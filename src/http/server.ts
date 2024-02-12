@@ -1,11 +1,25 @@
 import fastify from 'fastify'
 import { z } from 'zod'
-
+import { PrismaClient } from '@prisma/client'
+ 
 const app = fastify()
 
-app.post('/votes', (request) => {
-  console.log(request.body)
-  return 'hello mundo'
+const prisma = new PrismaClient()
+
+app.post('/votes', async (request, reply) => {
+  const createVoteBody = z.object({
+    title: z.string()
+  })
+
+ const { title } = createVoteBody.parse(request.body)
+
+  const vote = await prisma.vote.create ({
+  data: {
+    title,
+  }
+ })
+
+  return reply.status(201).send({voteId: vote.id})
 })
 
 
